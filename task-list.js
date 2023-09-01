@@ -1,13 +1,17 @@
+
 import "colors";
 import { inquirerMenu, pausa, leerInput } from "./helpers/inquirer.js";
 import Tareas from "./models/tareas.js";
+
+
+
 
 console.clear();
 
 const main = async () => {
   let opt = "";
   const tareas = new Tareas();
-  let tareasPendientes = [];
+  
 
   do {
     opt = await inquirerMenu();
@@ -150,39 +154,7 @@ const main = async () => {
         }
         break;
        
-        case "5":
-  const tareasPendientesCompletadas = tareas.listadoArr;
-  if (tareasPendientesCompletadas.length === 0) {
-    console.log("No hay tareas pendientes o completadas.\n".red);
-  } else {
-    console.log("\nTareas Pendientes y Completadas:\n".red);
-    tareasPendientesCompletadas.forEach((tarea, index) => {
-      console.log(`${(index + 1 + ".").red} ${tarea.desc} - ${
-        tarea.completada ? "Completada" : "Pendiente"
-      }`);
-    });
-
-    const tareaSeleccionada = await leerInput(
-      "Seleccione la tarea que desea borrar: "
-    );
-    const indexTareaSeleccionada = parseInt(tareaSeleccionada) - 1;
-    if (
-      indexTareaSeleccionada >= 0 &&
-      indexTareaSeleccionada < tareasPendientesCompletadas.length
-    ) {
-      const tareaBorrar = tareasPendientesCompletadas[indexTareaSeleccionada];
-      tareas.borrarTarea(tareaBorrar.id);
-      console.log(
-        `La tarea "${tareaBorrar.desc}" ha sido borrada de la lista.\n`.yellow
-      );
-
-      // Actualizar la lista de tareas pendientes y completadas después de borrar la tarea
-      tareasPendientesCompletadas.splice(indexTareaSeleccionada, 1);
-    } else {
-      console.log("La opción seleccionada no es válida.\n".red);
-    }
-  }
-  break;
+       
       
   case "0":
   console.log("Saliendo de la aplicación...\n");
@@ -195,5 +167,9 @@ const main = async () => {
     await pausa();
   } while (opt !== "0");
 };
+
+
+
+
 
 main();
