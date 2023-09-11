@@ -1,166 +1,173 @@
-
 import "colors";
 import { inquirerMenu, pausa, leerInput } from "./helpers/inquirer.js";
 import Tareas from "./models/tareas.js";
-
-
-
 
 console.clear();
 
 const main = async () => {
   let opt = "";
   const tareas = new Tareas();
-  
+  let tareasPendientes = [];
+  let tareaEncontrada;
 
   do {
     opt = await inquirerMenu();
     console.log({ opt });
 
     switch (opt) {
-        //crear tarea
+      //codigo para poder crear una tarea
       case "1":
         const desc = await leerInput("Descripcion: ");
         tareas.crearTarea(desc);
         break;
-        
 
-        //lista de tareas completadas
+      //codigo para mostrar lista de tareas completadas
       case "2":
-        console.log("\nTareas Completadas:\n".green);
         const completadas = tareas.listarCompletadas();
-        if (completadas.length === 0) {
-          console.log("No hay tareas completadas.\n".green);
+        const completadasFormateadas = completadas.map((tarea) => ({
+          id: tarea.id,
+          isCompleted: true,
+          description: tarea.desc,
+        }));
+
+        console.log("\nTareas Completadas:".green);
+        completadasFormateadas.forEach((tarea) => {
+          console.log(JSON.stringify(tarea,null,2));
+        });
+        break;
+
+      //cogigo para Borrar tareas completadas
+      case "3":
+        const tareasCompletadas2 = tareas.listarCompletadas();
+        const tareasCompletadasFormateadas2 = tareasCompletadas2.map(
+          (tarea, index) => ({
+            id: tarea.id,
+            isCompleted: true,
+            description: tarea.desc,
+            index: index + 1, // Agregar el índice para mostrar al usuario
+          })
+        );
+
+        console.log("\nTareas Completadas:".green);
+        tareasCompletadasFormateadas2.forEach((tarea) => {
+          console.log(JSON.stringify(tarea, null, 2));
+        });
+
+        const tareaEliminarCompletadaIndex = await leerInput(
+          "Seleccione el índice de la tarea completada que desea eliminar: "
+        );
+
+        const indexEliminarCompletada =
+          parseInt(tareaEliminarCompletadaIndex) - 1;
+
+        if (
+          indexEliminarCompletada >= 0 &&
+          indexEliminarCompletada < tareasCompletadas2.length
+        ) {
+          const tareaEliminarCompletada =
+            tareasCompletadas2[indexEliminarCompletada];
+          tareas.borrarTarea(tareaEliminarCompletada.id);
+          console.log(
+            `Tarea completada "${tareaEliminarCompletada.desc}" eliminada.\n`
+              .yellow
+          );
         } else {
-          completadas.forEach((tarea, index) => {
-            console.log(`${(index + 1 + ".").green} ${tarea.desc}`);
-          });
+          console.log("El índice seleccionado no es válido.\n".red);
         }
         break;
-      
 
-        //Borrar tareas completadas
-        case "3":
-            console.log("\nTareas Completadas:\n".green);
-            const Tcompletadas = tareas.listarCompletadas();
-            if (Tcompletadas.length === 0) {
-              console.log("No hay tareas completadas.\n".green);
-            } else {
-              Tcompletadas.forEach((tarea, index) => {
-                console.log(`${(index + 1 + ".").green} ${tarea.desc}`);
-              });
-          
-              const tareaSeleccionada = await leerInput(
-                "Seleccione la tarea que desea borrar: "
-              );
-              const indexTareaSeleccionada = parseInt(tareaSeleccionada) - 1;
-              if (
-                indexTareaSeleccionada >= 0 &&
-                indexTareaSeleccionada < Tcompletadas.length
-              ) {
-                const tareaBorrar = Tcompletadas[indexTareaSeleccionada];
-                tareas.borrarTarea(tareaBorrar.id);
-                console.log(
-                  `La tarea "${tareaBorrar.desc}" ha sido borrada de la lista de tareas completadas.\n`
-                    .yellow
-                );
-          
-                // Actualizar la lista de tareas completadas después de borrar la tarea
-                Tcompletadas.splice(indexTareaSeleccionada, 1);
-              } else {
-                console.log("La opción seleccionada no es válida.\n".red);
-              }
-            }
-            break;
-
-
-
-    //Mostrar lista de pendientes
+      //codigo para mostrar lista de pendientes
       case "4":
-        console.log("\nTareas Pendientes:\n".red);
         const pendientes = tareas.listarPendientes();
-        if (pendientes.length === 0) {
-          console.log("No hay tareas pendientes.\n".red);
-        } else {
-          pendientes.forEach((tarea, index) => {
-            console.log(`${(index + 1 + ".").red} ${tarea.desc}`);
-          });
-        }
+        const pendientesFormateadas = pendientes.map((tarea) => ({
+          id: tarea.id,
+          isCompleted: false,
+          description: tarea.desc,
+        }));
+        console.log(JSON.stringify(pendientesFormateadas,null, 2));
         break;
 
-     //Borrar tareas pendientes
-        case "5":
-  const tareasPendientes = tareas.listarPendientes();
-  if (tareasPendientes.length === 0) {
-    console.log("No hay tareas pendientes.\n".red);
-  } else {
-    console.log("\nTareas Pendientes:\n".red);
-    tareasPendientes.forEach((tarea, index) => {
-      console.log(`${(index + 1 + ".").red} ${tarea.desc}`);
-    });
+      //Borrar tareas pendientes
+      case "5":
+        const tareasPendientes3 = tareas.listarPendientes();
+        const tareasPendientesFormateadas3 = tareasPendientes3.map(
+          (tarea, index) => ({
+            id: tarea.id,
+            isCompleted: false,
+            description: tarea.desc,
+            index: index + 1, // Agregar el índice para mostrar al usuario
+          })
+        );
 
-    const tareaSeleccionada = await leerInput(
-      "Seleccione la tarea que desea borrar: "
-    );
-    const indexTareaSeleccionada = parseInt(tareaSeleccionada) - 1;
-    if (
-      indexTareaSeleccionada >= 0 &&
-      indexTareaSeleccionada < tareasPendientes.length
-    ) {
-      const tareaBorrar = tareasPendientes[indexTareaSeleccionada];
-      tareas.borrarTarea(tareaBorrar.id);
-      console.log(
-        `La tarea "${tareaBorrar.desc}" ha sido borrada de la lista de tareas pendientes.\n`
-          .yellow
-      );
+        console.log("\nTareas Pendientes:".red);
+        tareasPendientesFormateadas3.forEach((tarea) => {
+          console.log(JSON.stringify(tarea, null, 2));
+        });
 
-      // Actualizar la lista de tareas pendientes después de borrar la tarea
-      tareasPendientes.splice(indexTareaSeleccionada, 1);
-    } else {
-      console.log("La opción seleccionada no es válida.\n".red);
-    }
-  }
-  break;
+        const tareaEliminarPendienteIndex = await leerInput(
+          "Seleccione el índice de la tarea pendiente que desea eliminar: "
+        );
+
+        const indexEliminarPendiente =
+          parseInt(tareaEliminarPendienteIndex) - 1;
+
+        if (
+          indexEliminarPendiente >= 0 &&
+          indexEliminarPendiente < tareasPendientes3.length
+        ) {
+          const tareaEliminarPendiente =
+            tareasPendientes3[indexEliminarPendiente];
+          tareas.borrarTarea(tareaEliminarPendiente.id);
+          console.log(
+            `Tarea pendiente "${tareaEliminarPendiente.desc}" eliminada.\n`
+              .yellow
+          );
+        } else {
+          console.log("El índice seleccionado no es válido.\n".red);
+        }
+        break;
 
       case "6":
-        console.log("\nTareas Pendientes:\n".red);
-        const tareasPendientes4 = tareas.listarPendientes();
-        if (tareasPendientes4.length === 0) {
-          console.log("No hay tareas pendientes.\n".red);
-        } else {
-          tareasPendientes4.forEach((tarea, index) => {
-            console.log(`${(index + 1 + ".").red} ${tarea.desc}`);
-          });
+        const tareasPendientes2 = tareas.listarPendientes();
+        const tareasPendientesFormateadas2 = tareasPendientes2.map(
+          (tarea, index) => ({
+            id: tarea.id,
+            isCompleted: false,
+            description: tarea.desc,
+            index: index + 1, // Agregar el índice para mostrar al usuario
+          })
+        );
+        console.log(JSON.stringify(tareasPendientesFormateadas2, null, 2));
 
-          const tareaSeleccionada = await leerInput(
-            "Seleccione la tarea que desea marcar como completada: "
+        console.log("\nTareas Pendientes:".red);
+        tareasPendientesFormateadas2.forEach((tarea) => {
+          console.log(`${tarea.index}. ${tarea.description}`);
+        });
+
+        const tareaSeleccionadaIndex = await leerInput(
+          "Seleccione el índice de la tarea que desea marcar como completada: "
+        );
+
+        const indexSeleccionado = parseInt(tareaSeleccionadaIndex) - 1;
+
+        if (
+          indexSeleccionado >= 0 &&
+          indexSeleccionado < tareasPendientes2.length
+        ) {
+          const tareaEncontrada2 = tareasPendientes2[indexSeleccionado];
+          tareas.marcarCompletada(tareaEncontrada2.id);
+          console.log(
+            `Tarea "${tareaEncontrada2.desc}" marcada como completada.\n`.green
           );
-          const indexTareaSeleccionada = parseInt(tareaSeleccionada) - 1;
-          if (
-            indexTareaSeleccionada >= 0 &&
-            indexTareaSeleccionada < tareasPendientes4.length
-          ) {
-            const tareaCompletada = tareasPendientes4[indexTareaSeleccionada];
-            tareas.marcarCompletada(tareaCompletada.id);
-            console.log(
-              `La tarea "${tareaCompletada.desc}" ha sido marcada como completada.\n`
-                .green
-            );
-          } else {
-            console.log("La opción seleccionada no es válida.\n".red);
-          }
-
-          // No es necesario actualizar la lista de tareas pendientes ya que la tarea se marca directamente en la lista
+        } else {
+          console.log("El índice seleccionado no es válido.\n".red);
         }
         break;
-       
-       
-      
-  case "0":
-  console.log("Saliendo de la aplicación...\n");
-  opt = "0"; // Para salir del bucle y finalizar la aplicación
-  break;
 
+      case "0":
+        console.log("Saliendo de la aplicación...\n");
+        opt = "0"; // Para salir del bucle y finalizar la aplicación
+        break;
     }
 
     console.log("\n");
@@ -168,8 +175,5 @@ const main = async () => {
   } while (opt !== "0");
 };
 
-
-
-
-
 main();
+

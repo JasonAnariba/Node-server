@@ -1,51 +1,32 @@
-import http from "http";
-import { URL } from "url";
-import Tareas from "./models/tareas.js"; // Importa el módulo Tareas
+import express from 'express';
+import { inquirerMenu, pausa, leerInput } from './helpers/inquirer.js';
+import Tareas from './models/tareas.js';
 
-const host = "localhost";
-const port = 8000;
+const app = express();
+const port = 3000; // Puedes cambiar el puerto si es necesario
 
-const tareas = new Tareas(); // Crea una instancia del módulo Tareas
+// Configura middleware para procesar solicitudes JSON
+app.use(express.json());
 
-const requestListener = function (req, res) {
-  const url = new URL(req.url, `http://localhost:${port}`);
+// Crea una instancia de Tareas
+const tareas = new Tareas();
 
-  if (req.method === "GET" && url.pathname === "/tareas") {
-    // Obtener la lista de tareas pendientes y completadas
-    const tareasPendientes = tareas.listarPendientes();
-    const tareasCompletadas = tareas.listarCompletadas();
+// Define rutas para tu API
+app.get('/tareas-pendientes', (req, res) => {
+  const tareasPendientes = tareas.listarPendientes();
+  res.json(tareasPendientes);
+});
 
-    // Crear un objeto con las listas de tareas pendientes y completadas
-    const dataTareas = {
-      pendientes: tareasPendientes,
-      completadas: tareasCompletadas,
-    };
+app.post('/tareas', (req, res) => {
+  // Crea una nueva tarea utilizando la solicitud JSON recibida
+  const { desc } = req.body;
+  tareas.crearTarea(desc);
+  res.status(201).json({ message: 'Tarea creada con éxito' });
+});
 
-    // Convertir el objeto a formato JSON y enviar la respuesta al cliente
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(dataTareas));
-  } else if (req.method === "POST" && url.pathname === "/crear-tarea") {
-    // Manejar la creación de una nueva tarea
-    // Ejemplo: Obtener el cuerpo de la solicitud POST y agregar la tarea a la lista de tareas pendientes
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk.toString();
-    });
+// Define otras rutas según tus necesidades (marcar como completada, borrar, etc.)
 
-    req.on("end", () => {
-      const { desc } = JSON.parse(body);
-      tareas.crearTarea(desc);
-
-      res.writeHead(201, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ message: "Tarea creada exitosamente" }));
-    });
-  } else {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end("Ruta no encontrada");
-  }
-};
-
-const server = http.createServer(requestListener);
-server.listen(port, () => {
-  console.log(`Servidor corriendo en http://${host}:${port}`);
+// Inicia el servidor
+app.listen(port, () => {
+  console.log(`Servidor escuchando en http://localhost:${port}`);
 });

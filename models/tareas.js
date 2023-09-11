@@ -11,8 +11,7 @@ class Tareas {
             listado.push(tarea)
         console.log(key);
         });
-        return listado;1
-        
+        return listado;
     }
 
     constructor() {
@@ -43,14 +42,13 @@ marcarCompletada(id) {
 }
 
 listarPendientes() {
-  const pendientes = Object.values(this._listadoPendientes);
-  return { pendientes };
-}
+    return Object.values(this._listadoPendientes);
+  }
 
-listarCompletadas() {
-  const completadas = Object.values(this._listadoCompletadas);
-  return { completadas };
-}
+  listarCompletadas() {
+    return Object.values(this._listadoCompletadas);
+  }
 }  
+
 
 export default Tareas
